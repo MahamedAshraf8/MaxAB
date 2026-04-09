@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaxAB Data Challenge | Mohamed Ashraf Basha</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #003087; /* MaxAB Inspired Navy */
+            --secondary: #0072CE; /* Corporate Blue */
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light-bg: #f4f7f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+            margin: 0;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+
+        .contact-info span { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-left: 8px solid var(--primary);
+        }
+
+        h2 { color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+
+        .sql-block {
+            background: #1e1e1e;
+            color: #dcdcdc;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+
+        .insight-card {
+            background: #e7f3ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            border-right: 4px solid var(--secondary);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+        th { background: var(--primary); color: white; padding: 15px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f9f9f9; }
+
+        .badge { padding: 5px 12px; border-radius: 15px; font-size: 0.85em; font-weight: bold; }
+        .bg-high { background: #d4edda; color: #155724; }
+        .bg-low { background: #f8d7da; color: #721c24; }
+
+        .recommendation-list { list-style: none; padding: 0; }
+        .recommendation-list li { 
+            margin-bottom: 15px; 
+            padding-left: 30px; 
+            position: relative;
+        }
+        .recommendation-list li::before {
+            content: "\f058"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+            position: absolute; left: 0; color: var(--success);
+        }
+
+        footer { text-align: center; padding: 40px; background: #eee; color: #666; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-database"></i> MaxAB Digital Wallet Analysis Project</h1>
+    <h3>Comprehensive Analytical Challenge Solution</h3>
+    <div class="contact-info">
+        <span><i class="fas fa-user"></i> Mohamed Ashraf Basha</span>
+        <span><i class="fas fa-phone"></i> 01016251696</span>
+        <span><i class="fas fa-envelope"></i> mohamedashraf04q@gmail.com</span>
+        <span><i class="fas fa-graduation-cap"></i> Cairo University - Finance Major</span>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2><i class="fas fa-chart-bar"></i> Question 1: Collection Orders Analysis</h2>
+        <p>Analyzing weekly success rates, agent speed, and regional productivity for cash collections[cite: 11, 12].</p>
+
+        <h3>Part A: Weekly Success Rates</h3>
+        <div class="sql-block">
+SELECT DATEPART(week, collection_date) AS [Week],
+COUNT(*) AS Total,
+COUNT(CASE WHEN ACTION IN ('COLLECTED', 'PARTIALLY_COLLECTED') THEN 1 END) AS Success,
+ROUND(CAST(COUNT(CASE WHEN ACTION IN ('COLLECTED', 'PARTIALLY_COLLECTED') THEN 1 END) AS FLOAT) / 
+CAST(COUNT(*) AS FLOAT) * 100, 2) AS Success_Rate
+FROM Collection_orders GROUP BY DATEPART(week, collection_date);
+        </div>
+        <div class="insight-card">
+            <strong>Finding:</strong> A success rate is defined as orders either collected or partially collected[cite: 14]. This metric monitors the stability of field operations over time.
+        </div>
+
+        <h3>Part B: Agent Completion Speed (April)</h3>
+        <div class="sql-block">
+-- Ranking agents from Start to Finish for April [cite: 15]
+SELECT a.agent_id, AVG(DATEDIFF(minute, a.action_timestamp, b.action_timestamp)) AS Avg_Minutes
+FROM Collection_orders a JOIN Collection_orders b ON a.collection_order_id = b.collection_order_id
+WHERE a.ACTION = 'STARTED TASK' AND b.ACTION IN ('COLLECTED', 'FAILED') AND MONTH(a.collection_date) = 4
+GROUP BY a.agent_id ORDER BY Avg_Minutes ASC;
+        </div>
+
+        <h3>Part C: Zone Productivity</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Zone Name</th>
+                    <th>Productivity (Orders/Agent)</th>
+                    <th>Analysis Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ZONE_11</td>
+                    <td>321.5</td>
+                    <td><span class="badge bg-high">Most Productive [cite: 18]</span></td>
+                </tr>
+                <tr>
+                    <td>ZONE_28</td>
+                    <td>125.0</td>
+                    <td><span class="badge bg-low">Least Productive [cite: 18]</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="border-left-color: var(--secondary);">
+        <h2><i class="fas fa-file-invoice-dollar"></i> Question 2: Recharge Method Costs</h2>
+        <p>Comparative analysis of Digital vs. Manual recharge fees[cite: 20, 21].</p>
+        
+        <div class="sql-block">
+-- Cost breakdown: Digital (0.61%) vs Manual (17.5 EGP) 
+SELECT MONTH(c.payment_date) as Month,
+SUM(CASE WHEN recharge_method = 'UPG_DIGITAL_WALLET' THEN amount * 0.0061 ELSE 0 END) as Digital_Cost,
+SUM(CASE WHEN recharge_method = 'COLLECTION' AND device_type = 'pos' THEN 17.5 ELSE 0 END) as Manual_Cost
+FROM cash_ins c JOIN retailers r ON c.retailer_id = r.retailer_id
+GROUP BY MONTH(c.payment_date);
+        </div>
+        
+        <div class="insight-card">
+            <strong>Cost Trend:</strong> App users are limited to digital wallets, while POS users can utilize both methods[cite: 22, 23, 26].
+        </div>
+    </div>
+
+    <div class="card" style="border-left-color: var(--success);">
+        <h2><i class="fas fa-lightbulb"></i> Final Strategic Recommendations</h2>
+        <ul class="recommendation-list">
+            <li><strong>Re-allocate Resources:</strong> Shift agents from low-performing zones (e.g., Zone 28) to high-pressure zones (e.g., Zone 11) to balance workload[cite: 19, 57].</li>
+            <li><strong>Optimize Routes:</strong> Implement route planning in low-productivity areas to reduce transit time for agents[cite: 57].</li>
+            <li><strong>Incentivize Digital Adoption:</strong> Convert POS users from Manual Collection (Fixed 17.5 EGP) to Digital (0.61%) to significantly reduce processing costs[cite: 26, 65].</li>
+            <li><strong>Training Programs:</strong> Provide additional training for agents in zones with high failure rates or slow completion times.</li>
+        </ul>
+    </div>
+
+</div>
+
+<footer>
+    <p>Mohamed Ashraf Basha | Junior Data Analyst Portfolio | 2026</p>
+</footer>
+
+</body>
+</html>
